@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Power BI Paramters and Functions</title>
+  <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f7f6; /* Light, neutral background */
+        color: #333;
+        line-height: 1.7; /* Slightly increased line-height for readability */
+    }
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        padding: 25px 40px; /* Increased padding */
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    }
+    h1 {
+        color: #0078d4; /* Power BI-ish blue */
+        text-align: center;
+        border-bottom: 3px solid #005a9e; /* Thicker border */
+        padding-bottom: 20px;
+        margin-top: 0;
+        margin-bottom: 35px;
+        font-size: 2.4em; /* Slightly larger */
+        font-weight: 600;
+    }
+    h2 {
+        color: #005a9e; /* Darker blue for section heads */
+        border-bottom: 2px solid #cce4f7; /* Lighter border for H2 */
+        padding-bottom: 12px;
+        margin-top: 45px;
+        margin-bottom: 25px;
+        font-size: 1.9em;
+        font-weight: 500;
+    }
+    h3 {
+        color: #1a1a1a;
+        margin-top: 35px;
+        margin-bottom: 18px;
+        font-size: 1.5em;
+        font-weight: 500;
+    }
+    p {
+        margin-bottom: 18px;
+        color: #454545;
+    }
+    ol, ul {
+        margin-bottom: 25px;
+        padding-left: 30px;
+    }
+    li {
+        margin-bottom: 10px;
+    }
+    ul ul, ol ol, ul ol, ol ul { /* Nested lists styling */
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    pre {
+        background-color: #2d2d2d; /* Dark background for code blocks */
+        color: #f0f0f0; /* Light text for contrast */
+        padding: 18px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 0.95em; /* Slightly larger code font */
+        margin-top: 12px;
+        margin-bottom: 22px;
+        border: 1px solid #444;
+        white-space: pre-wrap; /* Allow wrapping for long lines if needed */
+        word-break: break-all; /* Break long words/URLs */
+    }
+    code { /* Inline code */
+        font-family: Consolas, 'Courier New', monospace;
+        background-color: #e8f0fe; /* Light blueish background */
+        color: #2c3e50;
+        padding: 3px 6px; /* Slightly more padding */
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    pre code { /* Reset inline code styles when nested in pre, as pre handles styling */
+        background-color: transparent;
+        color: inherit;
+        padding: 0;
+        border-radius: 0;
+        font-size: inherit;
+        white-space: pre; /* Preserve spaces within pre>code */
+        word-break: normal;
+    }
+    strong {
+        color: #004c8a; /* A slightly darker, more prominent blue for emphasis */
+        font-weight: 600;
+    }
+    .note { /* Optional class for callouts */
+        background-color: #fff3cd;
+        border-left: 5px solid #ffeeba;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 0 4px 4px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Power BI Paramters and Functions</h1>
+  <p>
+    This guide shows how to turn your single‑page scraping logic into a reusable Power Query function and invoke it over pages 1–8 (or any range) in Power BI. By creating parameterized functions, you can efficiently collect data across multiple pages while maintaining clean, maintainable code.
+  </p>
+
+  <h2>1. Create StartPage / EndPage Parameters</h2>
+  <p>First, we'll establish parameters to control which pages we want to scrape. This approach gives you flexibility to adjust the range without modifying your queries.</p>
+  <p>In Power BI Desktop:</p>
+  <ol>
+    <li>Go to <strong>Home → Manage Parameters → New Parameter</strong></li>
+    <li>
+      Create the first parameter:
+      <ul>
+        <li><strong>Name:</strong> <code>StartPage</code></li>
+        <li><strong>Type:</strong> Whole Number</li>
+        <li><strong>Current Value:</strong> 1</li>
+      </ul>
+    </li>
+    <li>Click <strong>OK</strong></li>
+    <li>
+      Repeat the process to create the second parameter:
+      <ul>
+        <li><strong>Name:</strong> <code>EndPage</code></li>
+        <li><strong>Type:</strong> Whole Number</li>
+        <li><strong>Current Value:</strong> 8</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h2>2. Build the fnGetPage Function</h2>
+  <p>
+    Now we'll create a reusable function that can scrape any single page. This function takes a page number as input and returns the structured data from that page.
+  </p>
+  <p>Create a blank query and convert it into a function:</p>
+  <ol>
+    <li>Go to <strong>Home → New Source → Blank Query</strong></li>
+    <li>Rename the query to <code>fnGetPage</code></li>
+    <li>Open <strong>Advanced Editor</strong> and replace its contents with:</li>
+  </ol>
+  
+  <pre><code>(Page as number) as table =>
+let
+  Url       = "https://riyasewana.com/search?page=" & Text.From(Page),
+  Source    = Web.BrowserContents(Url),
+  Parsed    = Html.Table(
+                Source,
+                {
+                  {"Column1", ".more *"},
+                  {"Column2", ".b"},
+                  {"Column3", ".s"},
+                  {"Column4", ".boxintxt:nth-child(1)"},
+                  {"Column5", ".promoted .b + *"}
+                },
+                [ RowSelector = ".item" ]
+              ),
+  Typed     = Table.TransformColumnTypes(
+                Parsed,
+                {
+                  {"Column1", type text},
+                  {"Column2", type text},
+                  {"Column3", type date},
+                  {"Column4", type text},
+                  {"Column5", type text}
+                }
+              )
+in
+  Typed</code></pre>
+
+  <h2>3. Invoke fnGetPage Over Your Page Range</h2>
+  <p>
+    The final step combines data from all pages within your specified range. This query uses your parameters to determine which pages to process and calls your function for each one.
+  </p>
+  <p>Create another blank query to pull all pages:</p>
+  <ol>
+    <li>Go to <strong>Home → New Source → Blank Query</strong></li>
+    <li>Rename it to <code>AllPages</code></li>
+    <li>Open <strong>Advanced Editor</strong> and paste:</li>
+  </ol>
+
+  <pre><code>let
+  Pages     = { StartPage .. EndPage },
+  PageTable = Table.FromList(Pages, Splitter.SplitByNothing(), {"PageNum"}),
+  WithData  = Table.AddColumn(
+                PageTable,
+                "Data",
+                each fnGetPage([PageNum]),
+                type table
+              ),
+  Expanded  = Table.ExpandTableColumn(
+                WithData,
+                "Data",
+                Table.ColumnNames(WithData{0}[Data])
+              ),
+  Result    = Table.RemoveColumns(Expanded, {"PageNum"})
+in
+  Result</code></pre>
+
+  <p>Then click <strong>Close & Apply</strong>.</p>
+
+  <h2>4. Result and Benefits</h2>
+  <p>
+    The <code>AllPages</code> query now combines rows from pages <code>StartPage</code> through <code>EndPage</code>. To adjust the range, simply change the <code>EndPage</code> parameter without touching any of your M code.
+  </p>
+  
+  <h3>Key Advantages</h3>
+  <p>This approach provides several benefits:</p>
+  <ul>
+    <li><strong>Scalability:</strong> Easily adjust the page range by modifying parameters</li>
+    <li><strong>Maintainability:</strong> Changes to scraping logic only need to be made in one function</li>
+    <li><strong>Reusability:</strong> The <code>fnGetPage</code> function can be used in other queries</li>
+    <li><strong>Performance:</strong> Power Query can optimize the parallel execution of multiple page requests</li>
+  </ul>
+
+  <p style="margin-top:30px; border-top:1px solid #eee; padding-top:20px;">
+    By implementing this paging solution, you've transformed a static single-page scraper into a flexible, parameterized system that can efficiently handle multi-page data collection scenarios.
+  </p>
+</div>
+</body>
+</html>

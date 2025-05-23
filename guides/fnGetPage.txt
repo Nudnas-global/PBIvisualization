@@ -1,0 +1,27 @@
+(Page as number) as table =>
+let
+  Url       = "https://riyasewana.com/search?page=" & Text.From(Page),
+  Source    = Web.BrowserContents(Url),
+  Parsed    = Html.Table(
+                Source,
+                {
+                  {"Column1", ".more *"},
+                  {"Column2", ".b"},
+                  {"Column3", ".s"},
+                  {"Column4", ".boxintxt:nth-child(1)"},
+                  {"Column5", ".promoted .b + *"}
+                },
+                [ RowSelector = ".item" ]
+              ),
+  Typed     = Table.TransformColumnTypes(
+                Parsed,
+                {
+                  {"Column1", type text},
+                  {"Column2", type text},
+                  {"Column3", type date},
+                  {"Column4", type text},
+                  {"Column5", type text}
+                }
+              )
+in
+  Typed

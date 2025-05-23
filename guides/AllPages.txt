@@ -1,0 +1,26 @@
+let
+  // 1. generate list of pages
+  Pages     = { StartPage .. EndPage },
+
+  // 2. turn into a table
+  PageTable = Table.FromList(Pages, Splitter.SplitByNothing(), {"PageNum"}),
+
+  // 3. invoke fnGetPage
+  WithData  = Table.AddColumn(
+                PageTable,
+                "Data",
+                each fnGetPage([PageNum]),
+                type table
+              ),
+
+  // 4. expand into one flat table
+  Expanded  = Table.ExpandTableColumn(
+                WithData,
+                "Data",
+                Table.ColumnNames(WithData{0}[Data])
+              ),
+
+  // 5. (optional) drop the PageNum column
+  Result    = Table.RemoveColumns(Expanded, {"PageNum"})
+in
+  Result

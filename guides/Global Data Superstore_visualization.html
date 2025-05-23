@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Visualization with Global Data Superstore.xls</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 950px; /* Increased width for wider tables */
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #005A9C; /* A Power BI-like blue */
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #005A9C;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 35px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        h3 {
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em; /* Slightly smaller font for tables */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 10px; /* Adjusted padding */
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f0f8ff; /* Light Alice Blue */
+            font-weight: bold;
+        }
+        pre {
+            background-color: #2d2d2d; /* Dark background for code */
+            color: #f8f8f2; /* Light text for code */
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', Courier, monospace;
+            background-color: #eef2f7; /* Light background for inline code */
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        pre code {
+            background-color: transparent; /* No double background for code in pre */
+            padding: 0;
+            font-size: 1em; /* Reset font size within pre */
+        }
+        .note {
+            font-style: italic;
+            color: #555;
+            background-color: #fff9e6; /* Light yellow background for note */
+            padding: 10px;
+            border-left: 4px solid #ffc107; /* Amber accent */
+            margin: 15px 0;
+        }
+        ul, ol {
+            margin-left: 0; /* Align with text */
+            padding-left: 25px; /* Indentation for bullets/numbers */
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        ul ul, ol ul, ul ol, ol ol {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #ccc;
+            margin: 30px 0;
+        }
+        a {
+            color: #0078D4; /* Standard link blue */
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .measure-name {
+            font-weight: bold;
+        }
+        .visual-number {
+            font-weight: bold;
+            white-space: nowrap; /* Prevent wrapping of visual number */
+        }
+        .step-by-step-list {
+            padding-left: 15px; /* Indent list inside table cell */
+            margin: 0;
+        }
+        .step-by-step-list li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Power BI Visualization with Global Data Superstore.xls</h1>
+
+        <p class="note">Below is a <strong>ready-to-follow playbook</strong> for turning your <strong>Global Data Superstore.xls</strong> workbook into business-ready visuals in <strong>Power BI Desktop (May 2025 or later)</strong>.
+        <br>The file has the standard Superstore fields (Order Date, Ship Date, Sales, Profit, Quantity, Discount, Category, Sub-Category, Segment, Country, State, City, Ship Mode, etc.).
+        <br>If your column names differ, just substitute them in the steps.</p>
+
+        <hr>
+
+        <h2>0. One-time data preparation</h2>
+        <ol>
+            <li><strong>Home &#9654; Get data &#9654; Excel</strong> &rarr; pick <strong>Global Data Superstore.xls</strong>.</li>
+            <li><strong>Navigator</strong>: tick the main sheet (often called <em>Orders</em> or <em>Superstore</em>), then <strong>Transform Data</strong>.</li>
+            <li>
+                In <strong>Power Query</strong>
+                <ul>
+                    <li>
+                        Ensure data types:
+                        <ul>
+                            <li><em>Order Date</em>, <em>Ship Date</em> &rarr; <strong>Date</strong></li>
+                            <li><em>Sales</em>, <em>Profit</em> &rarr; <strong>Fixed Decimal</strong> (currency)</li>
+                            <li><em>Quantity</em>, <em>Discount</em> &rarr; <strong>Whole / Decimal</strong></li>
+                        </ul>
+                    </li>
+                    <li>
+                        Add a <strong>Days to Ship</strong> column
+<pre><code class="language-powerquery">
+Duration.Days([Ship Date] - [Order Date])
+</code></pre>
+                        Rename it <em>Ship Days</em>.
+                    </li>
+                    <li>Close &amp; Apply.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Create a Date table</strong> (Modeling &#9654; New table):
+<pre><code class="language-dax">
+DimDate =
+CALENDAR ( MIN ( Orders[Order Date] ), MAX ( Orders[Order Date] ) )
+</code></pre>
+                <ul>
+                    <li><em>Mark as date table</em> so Time-intelligence works.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Model relationships</strong>
+                <ul>
+                    <li>DimDate<code>[Date]</code> &ndash;<u>1:*</u>&rarr; Orders<code>[Order Date]</code>.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <hr>
+
+        <h2>1. Reusable measures</h2>
+<pre><code class="language-dax">
+Total Sales     := SUM ( Orders[Sales] )
+Total Profit    := SUM ( Orders[Profit] )
+Total Quantity  := SUM ( Orders[Quantity] )
+Avg Discount %  := AVERAGE ( Orders[Discount] )
+Profit Margin % := DIVIDE ( [Total Profit], [Total Sales] )
+YoY Sales Δ %   := DIVIDE (
+                     [Total Sales] - CALCULATE ( [Total Sales], SAMEPERIODLASTYEAR ( DimDate[Date] ) ),
+                     CALCULATE ( [Total Sales], SAMEPERIODLASTYEAR ( DimDate[Date] ) )
+                   )
+</code></pre>
+        <p>Put them in a <em>Measures</em> folder for clarity.</p>
+
+        <hr>
+
+        <h2>2. Ten insight-rich visuals and how to build each one</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Visual (Power BI type)</th>
+                    <th>Business question it answers</th>
+                    <th>Step-by-step</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong class="visual-number">1</strong></td>
+                    <td><strong>Sales trend</strong> (Line)</td>
+                    <td><em>How have revenues evolved?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Insert &#9654; Line chart &rarr; X-axis <code>DimDate[Date]</code>, Y-axis <strong>Total Sales</strong>.</li>
+                            <li>Turn on data labels; set X-axis to <em>Continuous</em> for true time scale.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">2</strong></td>
+                    <td><strong>Year-over-Year sales growth</strong> (Column + KPI card)</td>
+                    <td><em>Are we growing?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>KPI card: field <strong>YoY Sales &Delta; %</strong> (format 0.0 %).</li>
+                            <li>Column chart: Axis <code>DimDate[Year]</code>, Values <strong>Total Sales</strong>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">3</strong></td>
+                    <td><strong>Profitability heat-map</strong> (Matrix with conditional formatting)</td>
+                    <td><em>Which Category &times; Sub-Category combinations make / lose money?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Matrix &rarr; Rows <code>Category</code>, Columns <code>Sub-Category</code>, Values <strong>Profit Margin %</strong>.</li>
+                            <li>Format &#9654; Conditional formatting &#9654; Background color &rarr; Diverging palette (red &lt; 0 &lt; green).</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">4</strong></td>
+                    <td><strong>Sales vs. Profit scatter</strong></td>
+                    <td><em>Do high-revenue items always yield high profit?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Scatter &rarr; X <strong>Total Sales</strong>, Y <strong>Total Profit</strong>, Size <strong>Total Quantity</strong>, Legend <code>Sub-Category</code>.</li>
+                            <li>Add a <em>Constant line</em> at Profit = 0.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">5</strong></td>
+                    <td><strong>Discount impact</strong> (Histogram or Box &amp; Whisker)</td>
+                    <td><em>How wide is the discount spread?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Get more visuals &#9654; “Histogram” custom visual &rarr; Field <code>Discount</code>.</li>
+                            <li>Optionally overlay <strong>Avg Discount %</strong> reference line.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">6</strong></td>
+                    <td><strong>Sales by Customer Segment</strong> (Stacked column)</td>
+                    <td><em>Which segment drives sales &amp; margin?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Axis <code>Segment</code>, Values <strong>Total Sales</strong>, <strong>Total Profit</strong> (add second value for stacked comparison).</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">7</strong></td>
+                    <td><strong>Geographical performance map</strong> (Filled map or Azure Maps)</td>
+                    <td><em>Which states or countries lead?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Location <code>State</code> (or <code>Country</code>), Size <strong>Total Sales</strong>, Color <strong>Profit Margin %</strong>.</li>
+                            <li>Turn on <em>Heat-map</em> layer for density.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">8</strong></td>
+                    <td><strong>Shipping performance</strong> (Column &amp; line combo)</td>
+                    <td><em>Does shipping speed affect profit?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Clustered column line chart &rarr; Column average <strong>Ship Days</strong>, Line <strong>Profit Margin %</strong>, Axis <code>Ship Mode</code>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">9</strong></td>
+                    <td><strong>Cohort waterfall – Order &rarr; Ship &rarr; Delivery</strong> (Waterfall)</td>
+                    <td><em>Where do we lose margin along the fulfilment chain?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Create three measures: <em>Sales</em>, <em>Shipping Cost</em> (if column exists) as negative, <em>Profit</em>.</li>
+                            <li>Waterfall chart &rarr; Category (<code>{Sales, ShippingCost, Profit}</code>), Y-axis corresponding measures.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong class="visual-number">10</strong></td>
+                    <td><strong>Top N customers dashboard tile</strong> (Bar + slicer)</td>
+                    <td><em>Who are the biggest buyers this year?</em></td>
+                    <td>
+                        <ul class="step-by-step-list">
+                            <li>Bar chart &rarr; Y <code>Customer Name</code>, X <strong>Total Sales</strong>.</li>
+                            <li>Add Top N filter (Top 10 by Total Sales).</li>
+                            <li>Sync with a Date-slicer (<code>DimDate[Year]</code>) so it updates with year selection.</li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h2>3. Publishing polish</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>How</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Theme</strong></td>
+                    <td>View &#9654; Theme &#9654; Browse &rarr; import a JSON theme or pick “Color-blind safe”.</td>
+                </tr>
+                <tr>
+                    <td><strong>Report tooltips</strong></td>
+                    <td>Create a mini-page (Page size 320&times;240) showing Sales, Profit, Margin, Discount; turn <em>Tooltip</em> = On.</td>
+                </tr>
+                <tr>
+                    <td><strong>Bookmarks &amp; buttons</strong></td>
+                    <td>Create a <em>Filtering</em> side-pane; add a <strong>Filter</strong> bookmark and toggle button for end-users.</td>
+                </tr>
+                <tr>
+                    <td><strong>Performance tweaks</strong></td>
+                    <td>Modeling &#9654; Manage columns &rarr; hide unused fields; turn off Auto Date/Time; enable <em>Store dataset using enhanced metadata</em> (Options &#9654; Preview features).</td>
+                </tr>
+                <tr>
+                    <td><strong>Refresh plan</strong></td>
+                    <td>Publish &#9654; Workspace &#9654; Dataset settings &#9654; Schedule refresh (+ gateway if the Excel file sits on-prem).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h3>What you’ll learn from these visuals</h3>
+        <ul>
+            <li><strong>1–2</strong> reveal macro growth and seasonal inflections.</li>
+            <li><strong>3</strong> pinpoints product lines to push or prune.</li>
+            <li><strong>4</strong> shows where big revenue hides margin risk.</li>
+            <li><strong>5</strong> quantifies discount discipline.</li>
+            <li><strong>6</strong> helps segment marketing focus.</li>
+            <li><strong>7</strong> guides regional resource allocation.</li>
+            <li><strong>8</strong> links logistics to profitability.</li>
+            <li><strong>9</strong> exposes cost leakage in fulfilment.</li>
+            <li><strong>10</strong> keeps your sales team laser-focused on high-value customers.</li>
+        </ul>
+
+        <p>Build them in order (measures first, visuals second) and you’ll have an interactive, board-ready dashboard in under an hour. Happy viz-crafting!</p>
+
+    </div>
+</body>
+</html>
