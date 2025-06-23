@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power BI Air Quality Data Analysis Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #1e3c72;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section h3 {
+            color: #2a5298;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .section h4 {
+            color: #444;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #2a5298;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-left: 4px solid #2a5298;
+        }
+        
+        .code-block.m-code {
+            border-left-color: #48bb78;
+        }
+        
+        .code-block.dax-code {
+            border-left-color: #ed8936;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background: #2a5298;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .tip-box {
+            background: #e6fffa;
+            border: 1px solid #38b2ac;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .tip-box::before {
+            content: "💡 Tip: ";
+            font-weight: bold;
+            color: #2c7a7b;
+        }
+        
+        .warning-box {
+            background: #fef5e7;
+            border: 1px solid #ed8936;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .warning-box::before {
+            content: "⚠️ Important: ";
+            font-weight: bold;
+            color: #c05621;
+        }
+        
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        
+        .step-list li {
+            counter-increment: step-counter;
+            margin: 1rem 0;
+            padding-left: 2.5rem;
+            position: relative;
+        }
+        
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #2a5298;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .mapping-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mapping-card h4 {
+            color: #2a5298;
+            margin-bottom: 0.5rem;
+        }
+        
+        .visual-type {
+            background: #edf2f7;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9rem;
+            margin: 0.2rem;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Power BI Air Quality Analysis</h1>
+            <p>Converting Python Data Analysis to Interactive Power BI Reports</p>
+        </div>
+        
+        <div class="content">
+            <!-- Setup Section -->
+            <div class="section">
+                <h2><span class="step-number">0</span>Setup: Import Data into Power BI Desktop</h2>
+                
+                <h3>Option A: Excel File Import</h3>
+                <ol class="step-list">
+                    <li>Open Power BI Desktop</li>
+                    <li>Go to <strong>Get Data → Excel</strong></li>
+                    <li>Select your <code>2025_24hour.xlsx</code> file</li>
+                    <li>In Navigator, choose the sheet containing the five raw columns:
+                        <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                            <li>humidity</li>
+                            <li>temperature</li>
+                            <li>pm2.5_atm</li>
+                            <li>datetime</li>
+                            <li>date</li>
+                        </ul>
+                    </li>
+                    <li>Click <strong>Transform Data</strong> to open Power Query editor</li>
+                </ol>
+                
+                <h3>Option B: Live API Data Download</h3>
+                <p>For real-time data from PurpleAir sensors:</p>
+                
+                <ol class="step-list">
+                    <li>Open Power BI Desktop</li>
+                    <li>Go to <strong>Get Data → Blank Query</strong></li>
+                    <li>In the Power Query editor, go to <strong>Home → Advanced Editor</strong></li>
+                    <li>Replace the default code with the PurpleAir API downloader:</li>
+                </ol>
+                
+                <div class="code-block m-code">
+// --- Parameters ---
+let
+    ApiKey   = "API-KEY",
+    SensorId = 123456,
+    Year     = 2025,
+// --- Build epoch start & end timestamps (UTC) ---
+    EpochStart =
+        Number.Round(
+            Duration.TotalSeconds(
+                #datetimezone(Year,     1, 1, 0, 0, 0, 0, 0)
+              - #datetimezone(1970,    1, 1, 0, 0, 0, 0, 0)
+            ), 0),
+    EpochEnd   =
+        Number.Round(
+            Duration.TotalSeconds(
+                #datetimezone(Year + 1, 1, 1, 0, 0, 0, 0, 0)
+              - #datetimezone(1970,    1, 1, 0, 0, 0, 0, 0)
+            ), 0),
+// --- Assemble request ---
+    BaseUrl   = "https://api.purpleair.com/v1/sensors/"
+                & Number.ToText(SensorId) & "/history",
+    Source    = Json.Document(
+                    Web.Contents(
+                        BaseUrl,
+                        [
+                            Headers = [#"X-API-Key" = ApiKey],
+                            Query   = [
+                                start_timestamp = Number.ToText(EpochStart),
+                                end_timestamp   = Number.ToText(EpochEnd),
+                                average         = "1440",               // 24 h bins
+                                fields          = "pm2.5_atm,temperature,humidity"
+                            ]
+                        ]
+                    )
+                ),
+// --- Turn JSON payload into a table ---
+    RawTable  = Table.FromRows(Source[data], Source[fields]),
+// --- Clean-up & enrich ---
+    #"Changed Type" = Table.TransformColumnTypes(
+                         RawTable,
+                         {
+                             {"time_stamp", Int64.Type},
+                             {"pm2.5_atm",  type number},
+                             {"temperature", type number},
+                             {"humidity",   type number}
+                         }
+                     ),
+    #"Add datetime" = Table.AddColumn(
+                         #"Changed Type", "datetime",
+                         each #datetime(1970,1,1,0,0,0)
+                              + #duration(0,0,0,[time_stamp]),
+                         type datetimezone
+                     ),
+    #"Add date"     = Table.AddColumn(
+                         #"Add datetime", "date",
+                         each Date.From([datetime]),
+                         type date
+                     ),
+    #"Removed Columns" = Table.RemoveColumns(#"Add date", {"time_stamp"})
+in
+    #"Removed Columns"
+                </div>
+                
+                <div class="warning-box">
+                    Before using the API code:
+                    <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                        <li>Replace <code>"API-KEY"</code> with your actual PurpleAir API key</li>
+                        <li>Replace <code>123456</code> with your target sensor ID</li>
+                        <li>Adjust the <code>Year</code> parameter as needed</li>
+                        <li>Set credential to <strong>Anonymous</strong> when prompted</li>
+                    </ul>
+                </div>
+                
+                <div class="tip-box">
+                    You should now see a query with the five columns (humidity, temperature, pm2.5_atm, datetime, date) either from Excel or the API. The data processing steps remain the same for both methods.
+                </div>
+            </div>
+
+            <!-- Power Query Section -->
+            <div class="section">
+                <h2><span class="step-number">1</span>Power Query (M) — Data Preprocessing</h2>
+                
+                <h3>1.1 Rename Columns and Set Data Types</h3>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Data Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>humidity, temperature, pm2.5_atm</td>
+                            <td>Decimal Number</td>
+                        </tr>
+                        <tr>
+                            <td>datetime</td>
+                            <td>Date/Time/Timezone (keeps "+00:00" UTC offset)</td>
+                        </tr>
+                        <tr>
+                            <td>date</td>
+                            <td>Date</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="tip-box">
+                    <strong>Home → Transform → Detect Data Type</strong> works well for automatic type detection.
+                </div>
+                
+                <h3>1.2 Add Engineered Columns</h3>
+                <p>Use <strong>Add Column → Custom Column</strong> unless noted otherwise:</p>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Python Field</th>
+                            <th>M Expression</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>hour</td>
+                            <td><code>Date.Hour([datetime])</code></td>
+                            <td>Add Column → Time → Hour → Hour</td>
+                        </tr>
+                        <tr>
+                            <td>day_of_week</td>
+                            <td><code>Date.DayOfWeek([datetime], Day.Monday)</code></td>
+                            <td>Monday = 0, ..., Sunday = 6</td>
+                        </tr>
+                        <tr>
+                            <td>day_name</td>
+                            <td><code>Date.ToText([datetime],"dddd")</code></td>
+                            <td>Full day name</td>
+                        </tr>
+                        <tr>
+                            <td>month</td>
+                            <td><code>Date.Month([datetime])</code></td>
+                            <td>Month number</td>
+                        </tr>
+                        <tr>
+                            <td>week_of_year</td>
+                            <td><code>Date.WeekOfYear([datetime], Day.Monday)</code></td>
+                            <td>Week number</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>Time Period Classification</h4>
+                <div class="code-block m-code">
+if [hour] &lt; 6 then "Night" 
+else if [hour] &lt; 12 then "Morning" 
+else if [hour] &lt; 18 then "Afternoon" 
+else "Evening"
+                </div>
+                
+                <h4>AQI Category Classification</h4>
+                <div class="code-block m-code">
+let pm=[pm2.5_atm] in 
+if pm &lt;= 12 then "Good" 
+else if pm &lt;= 35.4 then "Moderate" 
+else if pm &lt;= 55.4 then "Unhealthy for Sensitive" 
+else if pm &lt;= 150.4 then "Unhealthy" 
+else if pm &lt;= 250.4 then "Very Unhealthy" 
+else "Hazardous"
+                </div>
+                
+                <h4>Data Quality Flags</h4>
+                <div class="code-block m-code">
+if [temperature] &lt; -40 or [temperature] &gt; 120 then true else false
+                </div>
+                <p>Repeat similar logic for humidity and pm2.5 bounds.</p>
+                
+                <div class="tip-box">
+                    Keep the flags but don't remove outliers here—use slicers or filters in the report so you can toggle them on/off.
+                </div>
+                
+                <h3>1.3 Finalize Query</h3>
+                <ol class="step-list">
+                    <li>Rename the query to "Air"</li>
+                    <li>Click <strong>Close & Apply</strong></li>
+                </ol>
+            </div>
+
+            <!-- DAX Section -->
+            <div class="section">
+                <h2><span class="step-number">2</span>DAX — Rolling Averages & Statistics</h2>
+                
+                <p>Create these in <strong>Model view → New measure</strong> (or New column where noted).</p>
+                
+                <h3>2.1 Calendar Table</h3>
+                <p>Required for DAX time functions:</p>
+                
+                <div class="code-block dax-code">
+Date =
+ADDCOLUMNS (
+    CALENDAR ( MIN ( Air[date] ), MAX ( Air[date] ) ),
+    "Year",  YEAR ( [Date] ),
+    "Month", FORMAT ( [Date], "mmm" ),
+    "Day",   WEEKDAY ( [Date], 2 )
+)
+                </div>
+                
+                <div class="warning-box">
+                    In Model view → Manage relationships → link Air[date] ↔ Date[Date] (Many-to-1, single direction).
+                </div>
+                
+                <h3>2.2 Rolling Averages (Measures)</h3>
+                
+                <h4>3-Hour Rolling Average</h4>
+                <div class="code-block dax-code">
+PM25 Rolling 3 h :=
+VAR CurrentTime = MAX ( Air[datetime] )
+RETURN
+    CALCULATE (
+        AVERAGE ( Air[pm2.5_atm] ),
+        FILTER (
+            ALL ( Air ),
+            Air[datetime] > CurrentTime - TIME ( 3, 0, 0 )
+                && Air[datetime] <= CurrentTime
+        )
+    )
+                </div>
+                
+                <h4>24-Hour Rolling Average</h4>
+                <div class="code-block dax-code">
+PM25 Rolling 24 h :=
+CALCULATE (
+    [PM25 μg m3],               -- or AVERAGE ( Air[pm2.5_atm] )
+    DATESINPERIOD (
+        Date[DateTime],         -- create a DateTime column in Date table
+        MAX ( Air[datetime] ),
+        -24,
+        HOUR
+    )
+)
+                </div>
+                
+                <h3>2.3 Basic Statistical Measures</h3>
+                <div class="code-block dax-code">
+PM25 Avg := AVERAGE ( Air[pm2.5_atm] )
+PM25 Max := MAX ( Air[pm2.5_atm] )
+PM25 Min := MIN ( Air[pm2.5_atm] )
+Humidity Avg := AVERAGE ( Air[humidity] )
+Temperature Avg := AVERAGE ( Air[temperature] )
+                </div>
+            </div>
+
+            <!-- Visualizations Section -->
+            <div class="section">
+                <h2><span class="step-number">3</span>Report View — Creating Visualizations</h2>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Python Plot</th>
+                            <th>Power BI Visual</th>
+                            <th>Configuration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PM2.5 line with rolling averages</td>
+                            <td><span class="visual-type">Line Chart</span></td>
+                            <td>Axis: datetime<br>Values: pm2.5_atm, PM25 Rolling 3 h, PM25 Rolling 24 h</td>
+                        </tr>
+                        <tr>
+                            <td>Temperature & 24h rolling</td>
+                            <td><span class="visual-type">Line Chart</span></td>
+                            <td>Axis: datetime<br>Values: temperature, Temp Rolling 24 h</td>
+                        </tr>
+                        <tr>
+                            <td>PM2.5 histogram</td>
+                            <td><span class="visual-type">Clustered Column</span></td>
+                            <td>Right-click pm2.5_atm → New group → Bins (size ≈ 2–5 µg/m³)<br>Axis: binned column, Values: Count of rows</td>
+                        </tr>
+                        <tr>
+                            <td>PM2.5 by time period boxplot</td>
+                            <td><span class="visual-type">Box and Whisker Chart</span></td>
+                            <td>Install "Box and Whisker Chart by MAQ"<br>Axis: time_period, Values: pm2.5_atm</td>
+                        </tr>
+                        <tr>
+                            <td>Temperature by day boxplot</td>
+                            <td><span class="visual-type">Box and Whisker Chart</span></td>
+                            <td>Axis: day_name (sort by day_of_week), Values: temperature</td>
+                        </tr>
+                        <tr>
+                            <td>PM2.5 vs Temperature scatter</td>
+                            <td><span class="visual-type">Scatter Chart</span></td>
+                            <td>X: temperature, Y: pm2.5_atm<br>Legend/Color: humidity</td>
+                        </tr>
+                        <tr>
+                            <td>Average PM2.5 by Hour</td>
+                            <td><span class="visual-type">Line Chart</span></td>
+                            <td>Axis: hour, Values: PM25 Avg</td>
+                        </tr>
+                        <tr>
+                            <td>Average PM2.5 by Day of Week</td>
+                            <td><span class="visual-type">Column Chart</span></td>
+                            <td>Axis: day_name (sort by day_of_week)<br>Values: PM25 Avg</td>
+                        </tr>
+                        <tr>
+                            <td>AQI distribution</td>
+                            <td><span class="visual-type">Donut Chart</span></td>
+                            <td>Legend: aqi_category<br>Values: Count of rows</td>
+                        </tr>
+                        <tr>
+                            <td>Latest conditions</td>
+                            <td><span class="visual-type">Multi-row Card</span></td>
+                            <td>Create measures filtering to MAX datetime</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="tip-box">
+                    <strong>Layout tip:</strong> Use a 16:9 canvas with 3-row grid — top for time series, middle for distributions and correlations, bottom for summary cards.
+                </div>
+            </div>
+
+            <!-- Advanced Analytics Section -->
+            <div class="section">
+                <h2><span class="step-number">4</span>Advanced Analytics</h2>
+                
+                <div class="mapping-grid">
+                    <div class="mapping-card">
+                        <h4>Daily Averages Table</h4>
+                        <p>Create a table visual with date, PM25 Avg, PM25 Max, PM25 Min, Temperature Avg, etc.</p>
+                    </div>
+                    <div class="mapping-card">
+                        <h4>Peak Hours Analysis</h4>
+                        <p>Use Top N slicer on a bar chart of hour vs PM25 Avg (sorted descending).</p>
+                    </div>
+                    <div class="mapping-card">
+                        <h4>Worst Air Quality Days</h4>
+                        <p>Bar/column chart of date vs PM25 Avg, sorted descending with "Show top 5" filter.</p>
+                    </div>
+                    <div class="mapping-card">
+                        <h4>Rolling Statistics with Error Bands</h4>
+                        <p>Use Line & area combo or Error Bars analytic feature for mean ± standard deviation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publishing Section -->
+            <div class="section">
+                <h2><span class="step-number">5</span>Publish & Refresh</h2>
+                
+                <ol class="step-list">
+                    <li>Go to <strong>File → Publish</strong> to Power BI Service</li>
+                    <li>Choose your workspace</li>
+                    <li>Since data source is Excel in PBIX, no gateway needed</li>
+                    <li>For live PurpleAir API: set credential to Anonymous and keep X-API-Key in M header</li>
+                </ol>
+            </div>
+
+            <!-- Cheatsheet Section -->
+            <div class="section">
+                <h2>📋 Python → Power BI Cheatsheet</h2>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Python/Pandas</th>
+                            <th>Power BI Equivalent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>df['hour'] = df['datetime'].dt.hour</code></td>
+                            <td><code>Date.Hour([datetime])</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>.rolling(window=3)</code></td>
+                            <td><code>CALCULATE(..., DATESINPERIOD(...,-3,HOUR))</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>groupby('hour').mean()</code></td>
+                            <td>Axis = hour with Average aggregation</td>
+                        </tr>
+                        <tr>
+                            <td><code>plt.plot()</code> time series</td>
+                            <td>Line chart with multiple measures</td>
+                        </tr>
+                        <tr>
+                            <td><code>sns.heatmap(corr)</code></td>
+                            <td>Heatmap custom visual or matrix with background-color rules</td>
+                        </tr>
+                        <tr>
+                            <td>Boolean masks & outlier flags</td>
+                            <td>Boolean calculated columns with slicers</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
