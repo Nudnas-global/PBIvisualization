@@ -100,6 +100,7 @@
             overflow-x: auto;
             margin: 1rem 0;
             border-left: 4px solid #2a5298;
+            white-space: pre-wrap;
         }
         
         .code-block.m-code {
@@ -263,7 +264,7 @@
                     <li>Replace the default code with the PurpleAir API downloader:</li>
                 </ol>
                 
-                <div class="code-block m-code">
+                <pre class="code-block m-code">
 // --- Parameters ---
 let
     ApiKey   = "API-KEY",
@@ -325,7 +326,7 @@ let
     #"Removed Columns" = Table.RemoveColumns(#"Add date", {"time_stamp"})
 in
     #"Removed Columns"
-                </div>
+                </pre>
                 
                 <div class="warning-box">
                     Before using the API code:
